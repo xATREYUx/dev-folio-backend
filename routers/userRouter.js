@@ -1,17 +1,21 @@
 const router = require("express").Router();
 
-var firebase = require("firebase/app");
+var admin = require("firebase-admin");
+// const firebase = require("firebase");
+// var db = firebase.firestore();
 
 router.post("/", async (req, res) => {
-  firebase
+  const { email, password } = req.body;
+
+  admin
     .auth()
-    .createUserWithEmailAndPassword(req.body["email"], req.body["password"])
+    .createUserWithEmailAndPassword(email, password)
     .then((userData) => {
       // Signed in
       var user = userData.user;
-      console.log("userData.user.uid", userData.user.uid);
+      console.log("userData.user.email", userData.user.email);
       // Get Token
-      firebase
+      admin
         .auth()
         .currentUser.getIdToken(true)
         .then((idtoken) => {
@@ -36,13 +40,31 @@ router.post("/", async (req, res) => {
           console.log("error", error);
           res.status(500).send();
         });
+      db.collection("users")
+        .add({
+          email: email,
+        })
+        .then((docRef) => {
+          console.log("Document written with ID: ", docRef.id);
+        })
+        .catch((error) => {
+          console.error("Error adding document: ", error);
+        });
     });
 });
 
 router.get("/login", async (req, res) => {
-  firebase
+  const { email, password } = req.body;
+
+  // validate
+  if (!email || !password)
+    return res
+      .status(400)
+      .json({ errorMessage: "Please enter all required fields." });
+
+  admin
     .auth()
-    .signInWithEmailAndPassword(req.body["email"], req.body["password"])
+    .signInWithEmailAndPassword(email, password)
     .then((userData) => {
       // Signed in
       var user = userData.user;
@@ -78,7 +100,9 @@ router.get("/login", async (req, res) => {
 });
 
 router.get("/logout", async (req, res) => {
-  firebase
+  console.log("--Logout--");
+
+  admin
     .auth()
     .signOut()
     .then(() => {
