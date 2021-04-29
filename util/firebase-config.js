@@ -1,13 +1,13 @@
 const admin = require("firebase-admin");
 
-// const FIREBASE_CONFIG = {
-//   apiKey: "AIzaSyAuawLH7q5EJpdZtLyNDwj3amHHVNWzM1s",
-//   authDomain: "dev-portfolio-backend.firebaseapp.com",
-//   projectId: "dev-portfolio-backend",
-//   storageBucket: "dev-portfolio-backend.appspot.com",
-//   messagingSenderId: "354306256620",
-//   appId: "1:354306256620:web:34e74191e42229f8deffc9",
-// };
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAuawLH7q5EJpdZtLyNDwj3amHHVNWzM1s",
+  authDomain: "dev-portfolio-backend.firebaseapp.com",
+  projectId: "dev-portfolio-backend",
+  storageBucket: "dev-portfolio-backend.appspot.com",
+  messagingSenderId: "354306256620",
+  appId: "1:354306256620:web:34e74191e42229f8deffc9",
+};
 
 var serviceAccount = {
   // type: "service_account",
@@ -31,5 +31,5 @@ const FB_ADMIN_CONFIG = {
   storageBucket: "gs://dev-portfolio-backend.appspot.com",
 };
 
-// module.exports = FIREBASE_CONFIG;
+module.exports = FIREBASE_CONFIG;
 module.exports = FB_ADMIN_CONFIG;
