@@ -104,7 +104,7 @@ router.get("/logout", async (req, res) => {
 
   admin
     .auth()
-    .signOut()
+    .revokeRefreshTokens()
     .then(() => {
       res
         .cookie("token", "", {

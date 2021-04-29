@@ -23,13 +23,12 @@ router.post("/", multer.single("file"), (req, res) => {
   let file = req.file;
   if (file) {
     console.log("--File Present---");
-    console.log("file: ", req.file.path);
+    console.log("file: ", file);
 
     postController
       .uploadImageToStorage(file)
       .then((success) => {
         console.log("success");
-
         res.status(200).send({
           status: "success",
         });

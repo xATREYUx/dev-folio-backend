@@ -15,7 +15,7 @@ const uploadImageToStorage = async (file) => {
     // let fileUpload = bucket.file(newFileName);
 
     // let fileUpload = storageRef.child(newFileName);
-    storageRef.bucket().upload(file);
+    storageRef.bucket("images").file(file).createWriteStream().end(file.buffer);
     //   .then((snapshot) => {
     //     console.log("Uploaded a blob or file!");
     //   });
