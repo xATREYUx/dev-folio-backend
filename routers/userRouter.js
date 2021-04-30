@@ -8,6 +8,9 @@ var db = admin.firestore();
 router.post("/", async (req, res) => {
   const { email, password } = req.body;
 
+  const salt = await bcrypt.genSalt();
+  const passwordHash = await bcrypt.hash(password, salt);
+
   admin
     .auth()
     .createUser({ email, password })
@@ -15,18 +18,21 @@ router.post("/", async (req, res) => {
       // Signed in
       const user = userData.user;
       console.log("userData", userData);
+      console.log("passwordHAsh", passwordHash);
+
       admin
         .auth()
         .createCustomToken(userData.uid)
-        .then((token) => {
-          db.collection("users")
-            .add({
+        .then(async (token) => {
+          db.collection(`users`)
+            .doc(`${userData.uid}`)
+            .set({
               email: email,
-              passwordHash: password,
-              userId: userData.uid,
+              passwordHash: passwordHash,
+              userrId: userData.uid,
             })
             .then((docRef) => {
-              console.log("Document written with ID: ", docRef.id);
+              console.log("Document written with ID: ", docRef);
             })
             .catch((error) => {
               console.error("Error adding document: ", error);
@@ -53,43 +59,9 @@ router.post("/", async (req, res) => {
           console.log("error", error);
           res.status(500).send();
         });
-
-      // Get Token
-      //   admin
-      //     .auth()
-      //     .currentUser.getIdToken(true)
-      //     .then((idtoken) => {
-      //       console.log("token: ", idtoken);
-      //       res
-      //         .cookie("token", idtoken, {
-      //           httpOnly: true,
-      //           sameSite:
-      //             process.env.NODE_ENV === "development"
-      //               ? "lax"
-      //               : process.env.NODE_ENV === "production" && "none",
-      //           secure:
-      //             process.env.NODE_ENV === "development"
-      //               ? false
-      //               : process.env.NODE_ENV === "production" && true,
-      //         })
-      //         .send();
-      //     })
-      //     .catch((error) => {
-      //       var errorCode = error.code;
-      //       var errorMessage = error.message;
-      //       console.log("error", error);
-      //       res.status(500).send();
-      //     });
-      //   db.collection("users")
-      //     .add({
-      //       email: email,
-      //     })
-      //     .then((docRef) => {
-      //       console.log("Document written with ID: ", docRef.id);
-      //     })
-      //     .catch((error) => {
-      //       console.error("Error adding document: ", error);
-      //     });
+    })
+    .catch((error) => {
+      console.error("Error adding document: ", error);
     });
 });
 
@@ -102,77 +74,78 @@ router.get("/login", async (req, res) => {
       .status(400)
       .json({ errorMessage: "Please enter all required fields." });
 
-  const existingUser = admin.auth().getUserByEmail(email);
+  const existingUser = await admin.auth().getUserByEmail(email);
   if (!existingUser)
     return res.status(401).json({ errorMessage: "Wrong email or password" });
+  console.log("---User Found---", existingUser.uid);
 
-  const passwordCorrect = await bcrypt.compare(password, existingUser.password);
-  if (!passwordCorrect)
-    return res.status(401).json({ errorMessage: "Wrong email or password" });
-
-  // admin
-  //   .auth()
-  //   .signInWithEmailAndPassword(email, password)
-  //   .then((userData) => {
-  //     // Signed in
-  //     var user = userData.user;
-  //     var accessToken = userData.user;
-  //     console.log("Signed in user: ", user.uid + ", " + accessToken);
-  //     // Get Token
-  //     admin
-  //       .auth()
-  //       .currentUser.getIdToken(true)
-  //       .then((idtoken) => {
-  //         console.log("token: ", idtoken);
-  //         res
-  //           .cookie("token", idtoken, {
-  //             httpOnly: true,
-  //             sameSite:
-  //               process.env.NODE_ENV === "development"
-  //                 ? "lax"
-  //                 : process.env.NODE_ENV === "production" && "none",
-  //             secure:
-  //               process.env.NODE_ENV === "development"
-  //                 ? false
-  //                 : process.env.NODE_ENV === "production" && true,
-  //           })
-  //           .send();
-  //       })
-  //       .catch((error) => {
-  //         var errorCode = error.code;
-  //         var errorMessage = error.message;
-  //         console.log("error", error);
-  //         res.status(500).send();
-  //       });
-  //   });
+  db.collection("users")
+    // .where("uid", "==", existingUser.uid)
+    .doc(existingUser.uid)
+    .get()
+    .then(async (doc) => {
+      if (doc.exists) {
+        console.log("Document data:", doc.data());
+        await bcrypt
+          .compare(password, doc.data().passwordHash)
+          .then((result) => {
+            if (result) {
+              console.log("Authentication successful: ", result);
+              // do stuff
+            } else {
+              console.log("Authentication failed. Password doesn't match");
+              // do other stuff
+            }
+          })
+          .catch((err) => console.error(err));
+        // console.log("passwordCorrect", passwordCorrect);
+      } else {
+        // doc.data() will be undefined in this case
+        console.log("No such document!");
+      }
+    })
+    .then(async () => {
+      admin
+        .auth()
+        .createCustomToken(existingUser.uid)
+        .then((token) => {
+          res
+            .cookie("token", token, {
+              httpOnly: true,
+              sameSite:
+                process.env.NODE_ENV === "development"
+                  ? "lax"
+                  : process.env.NODE_ENV === "production" && "none",
+              secure:
+                process.env.NODE_ENV === "development"
+                  ? false
+                  : process.env.NODE_ENV === "production" && true,
+            })
+            .send();
+        });
+    })
+    .catch((error) => {
+      console.log("Error getting document:", error);
+    });
 });
 
 router.get("/logout", async (req, res) => {
   console.log("--Logout--");
-
-  admin
-    .auth()
-    .revokeRefreshTokens()
-    .then(() => {
-      res
-        .cookie("token", "", {
-          httpOnly: true,
-          sameSite:
-            process.env.NODE_ENV === "development"
-              ? "lax"
-              : process.env.NODE_ENV === "production" && "none",
-          secure:
-            process.env.NODE_ENV === "development"
-              ? false
-              : process.env.NODE_ENV === "production" && true,
-          expires: new Date(0),
-        })
-        .send();
-      // Sign-out successful.
-      console.log("Logged Out ");
+  res
+    .cookie("token", "", {
+      httpOnly: true,
+      sameSite:
+        process.env.NODE_ENV === "development"
+          ? "lax"
+          : process.env.NODE_ENV === "production" && "none",
+      secure:
+        process.env.NODE_ENV === "development"
+          ? false
+          : process.env.NODE_ENV === "production" && true,
+      expires: new Date(0),
     })
-    .catch((error) => {
-      // An error happened.
-    });
+    .send();
+  // Sign-out successful.
+  console.log("Logged Out");
 });
 module.exports = router;
