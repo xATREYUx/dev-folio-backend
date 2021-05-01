@@ -148,4 +148,25 @@ router.get("/logout", async (req, res) => {
   // Sign-out successful.
   console.log("Logged Out");
 });
+
+router.get("/loggedIn", (req, res) => {
+  try {
+    const token = req.cookies.token;
+    if (!token) return res.json(false);
+    admin
+      .auth()
+      .verifyIdToken(token)
+      .then((decodedToken) => {
+        const uid = decodedToken.uid;
+      })
+      .catch((error) => {
+        // Handle error
+      });
+    res.send(true);
+  } catch (err) {
+    console.error(err);
+    res.json(false);
+  }
+});
+
 module.exports = router;

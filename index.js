@@ -5,6 +5,8 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
 const admin = require("firebase-admin");
+var serviceAccount = require("./dev-portfolio-backend-firebase-adminsdk-y4nsc-82d8cc753f.json");
+
 const FIREBASE_CONFIG = require("./util/firebase-config");
 const FB_ADMIN_CONFIG = require("./util/firebase-config");
 // const firebase = require("firebase");
@@ -17,7 +19,10 @@ const app = express();
 
 // Initialize Firebase
 // firebase.initializeApp(FIREBASE_CONFIG);
-admin.initializeApp(FB_ADMIN_CONFIG);
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://dev-portfolio-backend-default-rtdb.firebaseio.com",
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
