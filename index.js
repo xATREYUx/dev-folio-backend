@@ -5,10 +5,10 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
 const admin = require("firebase-admin");
-var serviceAccount = require("./dev-portfolio-backend-firebase-adminsdk-y4nsc-82d8cc753f.json");
+var serviceAccount = require("./creds.json");
 
-const FIREBASE_CONFIG = require("./util/firebase-config");
-const FB_ADMIN_CONFIG = require("./util/firebase-config");
+// const FIREBASE_CONFIG = require("./util/firebase-config");
+// const FB_ADMIN_CONFIG = require("./util/firebase-config");
 // const firebase = require("firebase");
 require("firebase/auth");
 require("firebase/firestore");

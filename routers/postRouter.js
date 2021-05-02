@@ -13,6 +13,7 @@ require("firebase/storage");
 
 const multer = Multer({
   storage: Multer.memoryStorage(),
+
   limits: {
     fileSize: 5 * 1024 * 1024, // no larger than 5mb, you can change as needed.
   },
@@ -20,7 +21,10 @@ const multer = Multer({
 
 router.post("/", multer.single("file"), (req, res) => {
   console.log("--Post Image Initiated---");
+  console.log("req.files", req.file);
+
   let file = req.file;
+
   if (file) {
     console.log("--File Present---");
     console.log("file: ", file);

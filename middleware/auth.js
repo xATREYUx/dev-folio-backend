@@ -1,6 +1,6 @@
 const firebase = require("firebase");
 var admin = require("firebase-admin");
-const FIREBASE_CONFIG = require("../util/firebase-config").default;
+// const FIREBASE_CONFIG = require("../util/firebase-config").default;
 
 const authChk = (req, res, next) => {
   const token = req.cookies.token;
