@@ -19,28 +19,45 @@ const multer = Multer({
   },
 });
 
-router.post("/", multer.single("file"), (req, res) => {
-  console.log("--Post Image Initiated---");
-  console.log("req.files", req.file);
+router.post(
+  "/",
+  multer.fields([
+    {
+      name: "image-one",
+      maxCount: 1,
+    },
+    {
+      name: "image-two",
+      maxCount: 1,
+    },
+    {
+      name: "image-three",
+      maxCount: 1,
+    },
+  ]),
+  (req, res) => {
+    console.log("--Post Image Initiated---");
+    console.log("req.files", req.file);
 
-  let file = req.file;
+    let files = req.files;
 
-  if (file) {
-    console.log("--File Present---");
-    console.log("file: ", file);
+    if (files) {
+      console.log("--File Present---");
+      console.log("file: ", files);
 
-    postController
-      .uploadImageToStorage(file)
-      .then((success) => {
-        console.log("success");
-        res.status(200).send({
-          status: "success",
+      postController
+        .uploadImageToStorage(files)
+        .then((success) => {
+          console.log("success");
+          res.status(200).send({
+            status: "success",
+          });
+        })
+        .catch((error) => {
+          console.error(error);
         });
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+    }
   }
-});
+);
 
 module.exports = router;

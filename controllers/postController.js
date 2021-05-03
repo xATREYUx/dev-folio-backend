@@ -10,31 +10,65 @@ const storage = new Storage();
 
 const bucket = storage.bucket("devport-express-backend");
 
-const uploadImageToStorage = async (file) => {
+const uploadImageToStorage = async (files) => {
   return new Promise(async (resolve, reject) => {
-    if (!file) {
+    if (!files) {
       reject("---No Image File---");
     }
-    console.log("filepath: ", file);
+    console.log("filepath: ", files["image-one"][0].buffer);
 
-    let newFileName = `${file.originalname}_${Date.now()}`;
-    const fileName = bucket.file(`images/${newFileName}`);
+    let newFileNameOne = `${Date.now()}_${files["image-one"][0].originalname}`;
+    let newFileNameTwo = `${Date.now()}_${files["image-two"][0].originalname} `;
+    let newFileNameThree = `${Date.now()}_${
+      files["image-three"][0].originalname
+    }}`;
+
+    const fileNameOne = bucket.file(`images/${newFileNameOne}`);
+    const fileNameTwo = bucket.file(`images/${newFileNameTwo}`);
+    const fileNameThree = bucket.file(`images/${newFileNameThree}`);
+
     // // console.log("fileName: ", fileName);
 
-    const fileContents = file.buffer;
+    const fileContentsOne = files["image-one"][0].buffer;
+    const fileContentsTwo = files["image-two"][0].buffer;
+    const fileContentsThree = files["image-three"][0].buffer;
+
     // // console.log("fileContents: ", fileContents);
-
-    fileName.save(fileContents, (err) => {
-      if (!err) {
-        console.log("---Save Successful---");
-        console.log(
-          `Saved to: https://storage.cloud.google.com/devport-express-backend/images/${newFileName}`
-        );
-      } else {
-        console.log("---Error Occured During Upload---", err);
-      }
-    });
-
+    fileNameOne
+      .save(fileContentsOne, (err) => {
+        if (!err) {
+          console.log("---Save Successful---");
+          console.log(
+            `Saved to: https://storage.cloud.google.com/devport-express-backend/images/${newFileNameOne}`
+          );
+        } else {
+          console.log("---Error Occured During Upload---", err);
+        }
+      })
+      .then(
+        fileNameTwo.save(fileContentsTwo, (err) => {
+          if (!err) {
+            console.log("---Save Successful---");
+            console.log(
+              `Saved to: https://storage.cloud.google.com/devport-express-backend/images/${newFileNameTwo}`
+            );
+          } else {
+            console.log("---Error Occured During Upload---", err);
+          }
+        })
+      )
+      .then(
+        fileNameThree.save(fileContentsThree, (err) => {
+          if (!err) {
+            console.log("---Save Successful---");
+            console.log(
+              `Saved to: https://storage.cloud.google.com/devport-express-backend/images/${newFileNameThree}`
+            );
+          } else {
+            console.log("---Error Occured During Upload---", err);
+          }
+        })
+      );
     // let fileUpload = storageRef.child(newFileName);
     // storageRef
     //   .bucket("images")
