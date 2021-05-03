@@ -47,10 +47,10 @@ const uploadImageToStorage = async (files) => {
     const fileContentsTwo = files["image-two"][0].buffer;
     const fileContentsThree = files["image-three"][0].buffer;
 
-    fileNameOne
+    await fileNameOne
       .save(fileContentsOne, (err) => {
         if (!err) {
-          console.log("---Save Successful---");
+          console.log("---Save Image One Successful---");
         } else {
           console.log("---Error Occured During Upload---", err);
         }
@@ -58,7 +58,7 @@ const uploadImageToStorage = async (files) => {
       .then(
         fileNameTwo.save(fileContentsTwo, (err) => {
           if (!err) {
-            console.log("---Save Successful---");
+            console.log("---Save Image Two Successful---");
           } else {
             console.log("---Error Occured During Upload---", err);
           }
@@ -67,7 +67,7 @@ const uploadImageToStorage = async (files) => {
       .then(
         fileNameThree.save(fileContentsThree, (err) => {
           if (!err) {
-            console.log("---Save Successful---");
+            console.log("---Save Image Three Successful---");
           } else {
             console.log("---Error Occured During Upload---", err);
           }
@@ -84,12 +84,24 @@ const uploadImageToStorage = async (files) => {
   });
 };
 
-const uploadPost = (urls) => {
-  //   db.collection(`posts`).doc(`${userData.uid}`).set({
-  //     email: email,
-  //     passwordHash: passwordHash,
-  //     userrId: userData.uid,
-  //   });
+const uploadPost = (urls, body) => {
+  return new Promise(async (resolve, reject) => {
+    console.log("body log", JSON.stringify(body));
+    console.log("urls log", urls);
+
+    await db
+      .collection(`posts`)
+      .add({
+        textDataObject: body,
+        imageOneURL: urls["fileOneURL"][0],
+        imageTwoURL: urls["fileTwoURL"][0],
+        imageThreeURL: urls["fileThreeURL"][0],
+      })
+      .then(() => {
+        console.log("---Post Uploaded Successfully---");
+        resolve();
+      });
+  });
 };
 
 exports.uploadImageToStorage = uploadImageToStorage;
