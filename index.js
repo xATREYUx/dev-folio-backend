@@ -21,7 +21,7 @@ const app = express();
 // firebase.initializeApp(FIREBASE_CONFIG);
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://dev-portfolio-backend-default-rtdb.firebaseio.com",
+  databaseURL: "https://devport-express-backend.firebaseio.com",
 });
 
 const PORT = process.env.PORT || 5000;

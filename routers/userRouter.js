@@ -6,6 +6,7 @@ const firebase = require("firebase");
 var db = admin.firestore();
 
 router.post("/", async (req, res) => {
+  console.log("---User signup initiated---");
   const { email, password } = req.body;
 
   const salt = await bcrypt.genSalt();
@@ -15,6 +16,8 @@ router.post("/", async (req, res) => {
     .auth()
     .createUser({ email, password })
     .then((userData) => {
+      console.log("---User Created---");
+
       // Signed in
       const user = userData.user;
       console.log("userData", userData);

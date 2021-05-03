@@ -42,13 +42,15 @@ router.post(
     let files = req.files;
 
     if (files) {
-      console.log("--File Present---");
-      console.log("file: ", files);
+      console.log("--Files Present---");
+      console.log("files: ", files);
 
       postController
         .uploadImageToStorage(files)
-        .then((success) => {
+        .then((urls) => {
           console.log("success");
+          console.log(urls);
+          postController.uploadPost(urls);
           res.status(200).send({
             status: "success",
           });
