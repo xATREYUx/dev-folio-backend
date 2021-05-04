@@ -88,7 +88,6 @@ const uploadPost = (urls, body) => {
   return new Promise(async (resolve, reject) => {
     console.log("body log", JSON.stringify(body));
     console.log("urls log", urls);
-
     await db
       .collection(`posts`)
       .add({
@@ -97,9 +96,9 @@ const uploadPost = (urls, body) => {
         imageTwoURL: urls["fileTwoURL"][0],
         imageThreeURL: urls["fileThreeURL"][0],
       })
-      .then(() => {
-        console.log("---Post Uploaded Successfully---");
-        resolve();
+      .then((snapshot) => {
+        console.log("---Post Uploaded Successfully---", snapshot.id);
+        resolve("snapshot.id", snapshot.id);
       });
   });
 };

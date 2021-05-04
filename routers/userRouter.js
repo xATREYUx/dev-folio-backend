@@ -21,7 +21,7 @@ router.post("/", async (req, res) => {
       // Signed in
       const user = userData.user;
       console.log("userData", userData);
-      console.log("passwordHAsh", passwordHash);
+      console.log("passwordHash", passwordHash);
 
       admin
         .auth()

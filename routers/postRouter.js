@@ -1,6 +1,9 @@
 const router = require("express").Router();
 
-const authCheck = require("../middleware/auth");
+const auth = require("../middleware/auth");
+var admin = require("firebase-admin");
+var db = admin.firestore();
+
 const postController = require("../controllers/postController");
 const Multer = require("multer");
 const { v4: uuidv4 } = require("uuid");
@@ -21,6 +24,7 @@ const multer = Multer({
 
 router.post(
   "/",
+  auth,
   multer.fields([
     {
       name: "image-one",
@@ -51,7 +55,16 @@ router.post(
         .uploadImageToStorage(files)
         .then((urls, req) => {
           console.log("urls", urls);
-          postController.uploadPost(urls, body);
+          postController.uploadPost(urls, body).then((snapshot) => {
+            console.log("---Post Snapshot---", snapshot);
+
+            db.collection("users")
+              .doc(req.user)
+              .update({
+                posts: admin.firestore.FieldValue.arrayUnion(snapshot.id),
+              });
+          });
+
           res.status(200).send({
             status: "Success",
           });
@@ -62,5 +75,13 @@ router.post(
     }
   }
 );
+
+router.delete("/", auth, (req, res) => {
+  let body = req.body;
+  db.collection("posts")
+    .doc(body.docId)
+    .delete()
+    .then((x) => console.log("delete initiatiated", res));
+});
 
 module.exports = router;
